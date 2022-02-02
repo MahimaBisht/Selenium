@@ -1,27 +1,32 @@
 import java.util.List;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.How;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class objectRepo {
 	
 	WebDriver repoDriver;
 	Actions act;
 	int position;
-	String xpathWeeks;
+	WebDriverWait wait;
+	Boolean flag;
+	Actions action;
 	
 	objectRepo(WebDriver drive){
 		PageFactory.initElements(drive, this);
 		repoDriver = drive;
+		wait= new WebDriverWait(repoDriver, 30);
+		action = new Actions(repoDriver);
 	}
 	
 // types of relative xpaths
-// 
-//	
 
 	@FindBy(how = How.XPATH,using="//li[@data-cy='oneWayTrip']")
 	WebElement oneway;
@@ -94,7 +99,7 @@ public class objectRepo {
 		}
 	}
 	
-	@FindBy(how= How.XPATH, using="//*[@id=\"root\"]/div/div[2]/div/div[1]/div[2]/div[1]/div[3]")
+	@FindBy(how= How.XPATH, using="//span[@class='lbl_input latoBold appendBottom10']")
 	WebElement departure;
 	
 	public void clickOnDeparture() {
@@ -102,14 +107,43 @@ public class objectRepo {
 		departure.click();
 	}
 	
-	@FindBy(how=How.XPATH, using="//div[contains(@aria-label,'Thu Aug 12 2021')]")
-	WebElement day;
-	public void clickOnDay() {
-		System.out.println("clicking on day");
-		day.click();
+	
+	@FindBy(how=How.XPATH, using="//div[@class='DayPicker']/div/div/child::span[2]")
+	WebElement next;
+	List<WebElement> listofcaptions;
+	public void findMonth() {
+		flag=false;
+		listofcaptions = repoDriver.findElements(By.xpath("//div[@class='DayPicker-Caption']"));
+		
+		for (WebElement ele: listofcaptions) {
+			if(ele.getText().contains("August 2022") && ele.isDisplayed() && ele.isEnabled()) {
+				flag=true;
+			}
+		}
+		if (flag==false) {
+			wait.until(ExpectedConditions.elementToBeClickable(next));
+			next.click();
+			findMonth();
+		}
 	}
 	
-	@FindBy(how=How.XPATH, using="/html/body/div[1]/div/div[3]/div/div/div[2]/div[1]/div[5]/label/span")
+	@FindBy(how=How.XPATH, using="//div[@class='DayPicker-Day']")
+	List<WebElement> days;
+	
+	public void findNClickDay() {
+		flag=false;
+		for(WebElement day:days) {
+			if(day.getAttribute("aria-label").contentEquals("Fri Aug 19 2022")) {
+				day.click();
+				flag=true;
+				break;
+			}
+		}
+		if(flag==false)
+			System.out.println("-----------days not clicked due to some issue-----------");
+	}
+	
+	@FindBy(how=How.XPATH, using="//div[@data-cy='flightTraveller']//child::span")
 	WebElement tvlrNClass;
 	
 	public void clickOnTvlrNClass() {
@@ -117,7 +151,7 @@ public class objectRepo {
 		tvlrNClass.click();
 	}
 	
-	@FindBy(how=How.XPATH, using="//li[contains(@data-cy,'adults-2')]")
+	@FindBy(how=How.XPATH, using="//li[@data-cy='adults-2']")
 	WebElement adultCount;
 	public void clickOnAdultCount() {
 		System.out.println("clicking on adult count");
@@ -140,12 +174,21 @@ public class objectRepo {
 	
 	@FindBy(how=How.XPATH, using="//li[text()='Premium Economy']")
 	WebElement tvrlClass;
-	public void clickOntvrlClass() {
-		System.out.println("clicking on tvlr class");
-		tvrlClass.click();
+	public void clickOntvrlClass(String className) throws InterruptedException {
+		String path = String.format("//li[text()='"+className+"']");
+//		wait.until(ExpectedConditions);
+		WebElement ele = repoDriver.findElement(By.xpath(path));
+		action.moveToElement(ele).build();
+		action.perform();
+		Thread.sleep(2000);
+		
+		repoDriver.findElement(By.xpath(String.format(path+"//child::p"))).click();
+//		tvrlClass.click();
+		System.out.println("clicked on tvlr class");
 	}
 	
-	@FindBy(how=How.XPATH, using="//p[@data-cy='infantWarning']")
+//	@FindBy(how=How.XPATH, using="//p[@data-cy='infantWarning']")
+	@FindBy(how=How.XPATH, using="//p[@id='smallErrorMessage']")
 	WebElement warning;
 	public String getwarning() {
 		return warning.getText();

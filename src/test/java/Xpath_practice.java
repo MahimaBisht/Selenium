@@ -14,6 +14,13 @@ import com.google.common.io.Files;
 
 public class Xpath_practice {
 
+	//note: to create a dynamic xpath we can use String.format method of java 
+	//[dynamic xpath means which can be changed when req or in which we can pass values]
+	// like: String.format("//xpath[attribute='value'][%d]",variable);
+	
+	//using element.getLocation().x : we can get x axis value for element
+	//using element.getLocation().y : we can get x axis value for element
+	
 	WebDriver driver;
 	//xpath="//li[@data-cy='oneWayTrip']"
 	//xpath="//li[@data-cy='roundTrip']"

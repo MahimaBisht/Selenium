@@ -1,6 +1,7 @@
 
 import java.util.concurrent.TimeUnit;
 
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.NoSuchElementException;
@@ -23,13 +24,20 @@ public class script {
 		
 		@BeforeTest
 		public void setup() {
-			System.setProperty("webdriver.chrome.driver", "C:\\Users\\mahbisht\\Documents\\WORK_SPACES_STS\\DRIVERS\\chromedriver_1.exe");
+			System.setProperty("webdriver.chrome.driver", "C:\\Users\\mahbisht\\Documents\\WORK_SPACES_STS\\DRIVERS\\chromedriver.exe");
 			driver = new ChromeDriver();
 
 			//implicit wait examples
 			//driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
+			
+			
 			driver.manage().window().maximize();
 			driver.navigate().to("https://www.makemytrip.com/");
+			
+			for(int i=0;i<10;i++) {
+				driver.findElement(By.tagName("html")).sendKeys(Keys.chord(Keys.CONTROL,Keys.SHIFT,Keys.SUBTRACT));
+			}
+			
 			repoInsts = new objectRepo(driver);
 			wait = new WebDriverWait(driver,60);
 			driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
@@ -40,6 +48,10 @@ public class script {
 					repoInsts.ignoreOuterLoginModal();
 				}
 			}catch(Exception e) {System.out.println("exception in ignoring login box "+e);}
+			
+			if (driver.findElement(By.xpath("//div[@class='langCard  fixedCard bounceAni']")).isDisplayed()==true) {
+				driver.findElement(By.className("langCardClose")).click();
+			}
 		}
 		@Test
 		public void testTitle() {
@@ -63,26 +75,32 @@ public class script {
 				repoInsts.clickToCityInDropdown();
 			}catch(Exception e) {System.out.println("exception under clickToCityInDropdown "+e);}
 			try {
+//				System.out.println("click on departure");
 				repoInsts.clickOnDeparture();
-				repoInsts.clickOnDay();
-			}catch(Exception e) {System.out.println("exception under click on Departure "+e);}
+//				System.out.println("find month");
+				repoInsts.findMonth();
+//				System.out.println("click on day");
+				repoInsts.findNClickDay();
+//				System.out.println("clicked day");
+			}catch(Exception e) {System.out.println("exception "+e);}
 		}
 		@Test
 		public void testWarning() {
 			try {
-				if (driver.findElement(By.className("langCard")).isDisplayed()==true) {
-					driver.findElement(By.className("langCardClose")).click();
-				}
+				
 				repoInsts.clickOnTvlrNClass();
 				repoInsts.clickOnAdultCount();
 				repoInsts.clickOnChildrenCount();
 				repoInsts.clickOnInfantCount();
-				repoInsts.clickOntvrlClass();
-			}catch(Exception e) {System.out.println("exception under test warning "+e);}
+				repoInsts.clickOntvrlClass("Premium Economy");
+			}
+			catch(Exception e) 
+				{
+					System.out.println("exception under test warning "+e);
+				}
+			Assert.assertEquals(repoInsts.getwarning(), "Number of infants cannot be more than adults");		
 			repoInsts.clickOnApply();
-			Assert.assertEquals(repoInsts.warning.getText(), "Number of infants cannot be more than adults");
-			
-		}
+			}
 		@Test
 		public void testNoWarning() {
 			try {
@@ -112,6 +130,6 @@ public class script {
 		@AfterTest
 		public void clearUp() throws InterruptedException {
 			Thread.sleep(5000);
-			driver.quit();
+			
 		}
 }
